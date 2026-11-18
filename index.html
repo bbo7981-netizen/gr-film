@@ -39,7 +39,11 @@
   .busy{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(14,12,10,.6);font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.1em;color:var(--accent)}
   .busy.on{display:flex}
 
-  .presets{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .presets{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin:0 -16px;padding:2px 16px 6px;scrollbar-width:none}
+  .presets::-webkit-scrollbar{display:none}
+  .presets .preset{flex:0 0 46%;scroll-snap-align:start}
+  .strip-hint{display:flex;justify-content:space-between;align-items:baseline;margin:0 2px 8px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;color:var(--sub)}
+  .preset .tag{display:inline-block;font-family:"Noto Sans KR",sans-serif;font-size:10px;letter-spacing:0;color:#1b140a;background:#8fae7a;border-radius:3px;padding:0 5px;margin-left:4px;vertical-align:1px}
   .preset{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:12px 12px 11px;text-align:left;font:inherit;cursor:pointer;position:relative}
   .preset .no{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--sub);letter-spacing:.1em}
   .preset .nm{font-weight:700;font-size:15.5px;margin:3px 0 2px}
@@ -130,6 +134,7 @@
     <div class="busy" id="busy">DEVELOPING…</div>
   </div>
 
+  <div class="strip-hint"><span>FILM · 7</span><span>옆으로 넘겨보세요 →</span></div>
   <div class="presets" id="presets">
     <button class="preset on" data-p="daylight">
       <div class="no">① DAYLIGHT</div>
@@ -142,6 +147,36 @@
       <div class="nm">따뜻한 필름</div>
       <div class="ds">건물·꽃·골목 · 앰버, 크림빛 하이라이트</div>
       <div class="sw"><i style="background:#8a4a2a"></i><i style="background:#c77a3c"></i><i style="background:#e6c48a"></i><i style="background:#6f6b3a"></i><i style="background:#3a2a20"></i></div>
+    </button>
+    <button class="preset" data-p="chrome">
+      <div class="no">③ CLASSIC CHROME<span class="tag">FUJI 느낌</span></div>
+      <div class="nm">클래식 크롬</div>
+      <div class="ds">거리·다큐 · 차분한 색, 단단한 그림자</div>
+      <div class="sw"><i style="background:#5d7480"></i><i style="background:#8a5a48"></i><i style="background:#b9a98f"></i><i style="background:#4a5244"></i><i style="background:#1a1a1a"></i></div>
+    </button>
+    <button class="preset" data-p="neg">
+      <div class="no">④ CLASSIC NEG<span class="tag">FUJI 느낌</span></div>
+      <div class="nm">클래식 네거</div>
+      <div class="ds">일상·스냅 · 청록 그림자, 깊은 빨강</div>
+      <div class="sw"><i style="background:#2f5a5a"></i><i style="background:#9a2f3a"></i><i style="background:#d8c3a0"></i><i style="background:#4f7a6a"></i><i style="background:#1c2224"></i></div>
+    </button>
+    <button class="preset" data-p="velvia">
+      <div class="no">⑤ VELVIA<span class="tag">FUJI 느낌</span></div>
+      <div class="nm">벨비아</div>
+      <div class="ds">풍경·꽃 · 쨍한 원색, 진한 하늘</div>
+      <div class="sw"><i style="background:#1d4fa8"></i><i style="background:#2f8a3a"></i><i style="background:#d2302a"></i><i style="background:#e8c020"></i><i style="background:#120f0c"></i></div>
+    </button>
+    <button class="preset" data-p="nostalgic">
+      <div class="no">⑥ NOSTALGIC NEG<span class="tag">FUJI 느낌</span></div>
+      <div class="nm">노스탤직 네거</div>
+      <div class="ds">오후 햇살 · 앰버 하이라이트, 포근함</div>
+      <div class="sw"><i style="background:#c8873e"></i><i style="background:#e7c08a"></i><i style="background:#8b4a32"></i><i style="background:#6a6a48"></i><i style="background:#2b211b"></i></div>
+    </button>
+    <button class="preset" data-p="acros">
+      <div class="no">⑦ ACROS<span class="tag">FUJI 느낌</span></div>
+      <div class="nm">아크로스 흑백</div>
+      <div class="ds">인물·골목 · 깊은 흑백, 고운 입자</div>
+      <div class="sw"><i style="background:#0f0f0f"></i><i style="background:#3a3a3a"></i><i style="background:#7a7a7a"></i><i style="background:#bdbdbd"></i><i style="background:#efefef"></i></div>
     </button>
   </div>
 
@@ -223,6 +258,77 @@
       clarity: -0.30,
       vignette: 0.26,
       grain: 30
+    },
+    chrome: {
+      recipe: "채도 <b>-2</b> · 섀도 대비 <b>+2</b> · 하늘 <b>차분한 시안</b> · 빨강 <b>벽돌색</b> · 하이라이트 <b>살짝 따뜻</b> · 그레인 <b>약</b>",
+      ev: -0.12, wb: [1.01, 1.0, 0.98],
+      contrast: 0.12, shadow: 0.09, knee: 0.62, shoulder: 0.35, fade: 0.01,
+      sat: -0.22,
+      hues: [
+        [  5, 28, -0.04, 12, 0.2, -0.06],   // 빨강 → 벽돌색
+        [ 28, 14,  0.06, null, 0, 0],       // 피부톤은 살짝 살림
+        [ 55, 22, -0.10, 45, 0.3, 0],       // 노랑 → 머스터드
+        [110, 45, -0.15, 95, 0.2, -0.05],   // 초록 차분하게
+        [205, 40, -0.08, 198, 0.4, -0.07],  // 하늘 → 탁한 시안, 깊게
+      ],
+      tintS: [0.0, 0.004, 0.012], tintH: [0.012, 0.006, -0.004],
+      soften: 0.10, clarity: -0.05, vignette: 0.12, grain: 10, mono: false
+    },
+    neg: {
+      recipe: "대비 <b>+2</b> · 섀도 <b>청록</b> · 하이라이트 <b>따뜻</b> · 초록 <b>→ 틸</b> · 빨강 <b>깊게</b> · 블랙 <b>살짝 띄움</b> · 그레인",
+      ev: -0.10, wb: [1.0, 1.0, 0.97],
+      contrast: 0.20, shadow: 0.05, knee: 0.58, shoulder: 0.42, fade: 0.035,
+      sat: -0.08,
+      hues: [
+        [  0, 24,  0.10, 355, 0.3, -0.08],  // 빨강 → 깊은 크림슨
+        [ 28, 14, -0.05, 24, 0.2, 0],       // 피부톤 보호
+        [ 55, 22, -0.05, 50, 0.3, 0],       // 노랑
+        [115, 50, -0.05, 150, 0.4, -0.04],  // 초록 → 청록빛
+        [210, 40,  0.00, 200, 0.3, 0],      // 파랑 → 시안 쪽
+      ],
+      tintS: [-0.020, 0.008, 0.020], tintH: [0.022, 0.004, -0.006],
+      soften: 0.15, clarity: -0.10, vignette: 0.18, grain: 25, mono: false
+    },
+    velvia: {
+      recipe: "채도 <b>+3</b> · 대비 <b>+2</b> · 하늘 <b>진한 블루</b> · 초록 <b>생생하게</b> · 피부톤 <b>보호</b>",
+      ev: -0.12, wb: [1.0, 1.0, 1.0],
+      contrast: 0.22, shadow: 0.08, knee: 0.62, shoulder: 0.40, fade: 0.0,
+      sat: 0.32,
+      hues: [
+        [  0, 26,  0.15, null, 0, 0],       // 빨강
+        [ 28, 14, -0.24, null, 0, 0],       // 피부톤 보호 (과포화 방지)
+        [ 55, 22,  0.10, null, 0, 0],       // 노랑
+        [115, 50,  0.22, 120, 0.2, -0.06],  // 초록
+        [215, 35,  0.25, 222, 0.3, -0.10],  // 파랑 → 깊게
+        [300, 40,  0.15, null, 0, 0],       // 마젠타·보라 꽃
+      ],
+      tintS: [0, 0, 0], tintH: [0, 0, 0],
+      soften: 0.05, clarity: 0.05, vignette: 0.12, grain: 0, mono: false
+    },
+    nostalgic: {
+      recipe: "하이라이트 <b>앰버</b> · 대비 <b>부드럽게</b> · 섀도 <b>진하게</b> · 초록 <b>→ 올리브</b> · 명료도 <b>-2</b> · 그레인",
+      ev: -0.05, wb: [1.04, 1.0, 0.90],
+      contrast: 0.04, shadow: 0.07, knee: 0.55, shoulder: 0.50, fade: 0.02,
+      sat: 0.0,
+      hues: [
+        [  5, 24,  0.08, 18, 0.2, 0],       // 빨강 → 따뜻하게
+        [ 35, 20,  0.12, null, 0, 0],       // 오렌지·앰버
+        [ 28, 12, -0.06, null, 0, 0],       // 피부톤 보호
+        [ 55, 22,  0.05, 45, 0.3, 0],       // 노랑 → 골드
+        [110, 45, -0.15, 80, 0.35, 0],      // 초록 → 올리브
+        [210, 40, -0.08, 205, 0.2, 0],      // 파랑 차분하게
+      ],
+      tintS: [0.008, 0.0, -0.005], tintH: [0.030, 0.014, -0.022],
+      soften: 0.20, clarity: -0.20, vignette: 0.18, grain: 18, mono: false
+    },
+    acros: {
+      recipe: "흑백 · 레드 필터 느낌 · 대비 <b>+2</b> · 섀도 <b>깊게</b> · 하이라이트 <b>부드럽게</b> · 고운 그레인",
+      ev: -0.08, wb: [1.0, 1.0, 1.0],
+      contrast: 0.27, shadow: 0.10, knee: 0.62, shoulder: 0.36, fade: 0.012,
+      sat: 0, hues: [],
+      tintS: [0, 0, 0], tintH: [0, 0, 0],
+      soften: 0.10, clarity: 0.05, vignette: 0.20, grain: 35,
+      mono: true, monoW: [0.36, 0.54, 0.10]
     }
   };
 
@@ -319,6 +425,7 @@
         r += dl; gg += dl; b += dl;
         // 3) white balance + exposure
         r *= wbR; gg *= wbG; b *= wbB;
+        if (p.mono){ const m = p.monoW[0]*r + p.monoW[1]*gg + p.monoW[2]*b; r = m; gg = m; b = m; }
         // 4) tone curve on luminance, ratio-preserving (avoids hue shifts / HDR look)
         // tone reference mixes luminance with max channel so saturated reds/yellows keep their brightness
         const MX = r>gg?(r>b?r:b):(gg>b?gg:b);
@@ -510,7 +617,8 @@
       const outData = develop(full, PRESETS[presetKey], amount, grain);
       full.getContext('2d').putImageData(outData, 0, 0);
       const blob = await new Promise(res => full.toBlob(res, 'image/jpeg', 0.95));
-      const name = `${fileBase}_GR_${presetKey === 'daylight' ? 'Daylight' : 'WarmFilm'}.jpg`;
+      const FN = {daylight:'Daylight',warm:'WarmFilm',chrome:'ClassicChrome',neg:'ClassicNeg',velvia:'Velvia',nostalgic:'NostalgicNeg',acros:'Acros'};
+      const name = `${fileBase}_${FN[presetKey]||presetKey}.jpg`;
       let saved = false;
       if (downloadsNS){
         try { await downloadsNS.save({ filename: name, data: blob }); saved = true; toast('저장했어요'); }
