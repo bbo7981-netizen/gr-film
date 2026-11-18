@@ -82,6 +82,25 @@
   .result img{max-width:100%;border-radius:4px}
   .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#000;color:var(--ink);font-size:13px;padding:10px 16px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;border:1px solid var(--line);white-space:nowrap}
   .toast.on{opacity:1}
+
+  .install{display:flex;align-items:center;gap:12px;margin-top:14px;padding:10px 12px;background:var(--panel);border:1px solid var(--accent);border-radius:8px}
+  .install img{width:44px;height:44px;border-radius:10px;flex:none}
+  .install .t{flex:1;font-size:13px;line-height:1.45;color:var(--sub)}
+  .install .t b{display:block;color:var(--ink);font-size:14px}
+  .install .go{flex:none;height:36px;padding:0 14px;border-radius:18px;border:0;background:var(--accent);color:#1b140a;font:inherit;font-weight:700;font-size:13px}
+  .install .x{flex:none;background:none;border:0;color:var(--sub);font-size:20px;padding:4px 2px;line-height:1}
+  .sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+  .sheet .box{width:100%;max-width:560px;background:#1f1b16;border-top:1px solid var(--line);border-radius:16px 16px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom))}
+  .sheet h2{margin:0 0 4px;font-size:17px}
+  .sheet .sub{margin:0 0 16px;font-size:13px;color:var(--sub);line-height:1.5}
+  .sheet ol{margin:0;padding:0;list-style:none;counter-reset:s}
+  .sheet li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);font-size:14.5px;line-height:1.5}
+  .sheet li:before{content:counter(s);flex:none;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#1b140a;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .sheet .ico{display:inline-flex;vertical-align:-4px;padding:1px 6px;border:1px solid var(--line);border-radius:5px;margin:0 2px;font-size:13px}
+  .sheet .close{margin-top:16px;width:100%}
+  .sheet .arrow{position:fixed;left:50%;bottom:calc(6px + env(safe-area-inset-bottom));transform:translateX(-50%);font-size:28px;color:var(--accent);animation:bob 1s ease-in-out infinite;pointer-events:none}
+  @keyframes bob{50%{transform:translate(-50%,6px)}}
+  .howto{background:none;border:0;color:var(--accent);font:inherit;font-size:12.5px;text-decoration:underline;margin-top:10px;padding:6px}
   footer{margin-top:22px;font-size:11px;color:#6f6556;text-align:center;line-height:1.6}
 </style>
 </head>
@@ -91,6 +110,13 @@
     <h1>GR <b>Positive</b> Film</h1>
     <span>28mm · f/2.8</span>
   </header>
+
+  <div class="install" id="install" hidden>
+    <img src="icon-192.png" alt="">
+    <div class="t"><b>홈 화면에 앱으로 추가</b><span id="installSub">아이콘 누르면 바로 열려요</span></div>
+    <button class="go" id="installGo">추가하기</button>
+    <button class="x" id="installX" aria-label="닫기">×</button>
+  </div>
 
   <div class="stage" id="stage">
     <div class="empty" id="empty">
@@ -140,9 +166,10 @@
     <a class="btn" id="dlLink" style="margin-top:10px;text-decoration:none">파일로 다운로드</a>
   </div>
 
-  <footer>사진은 기기 안에서만 처리되고 어디에도 업로드되지 않아요.<br>저장 해상도: 긴 변 최대 4000px</footer>
+  <footer>사진은 기기 안에서만 처리되고 어디에도 업로드되지 않아요.<br>저장 해상도: 긴 변 최대 4000px<br><button class="howto" id="howto">📲 홈 화면에 앱으로 추가하는 법</button></footer>
 </div>
 <div class="toast" id="toast"></div>
+<div class="sheet" id="sheet" hidden><div class="box" id="sheetBox"></div></div>
 
 <script>
 (() => {
@@ -500,6 +527,76 @@
   };
 
   renderRecipe();
+})();
+</script>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/i.test(ua);
+  const isKakao = /KAKAOTALK/i.test(ua);
+  const inApp = isKakao || /Instagram|FBAN|FBAV|NAVER\(inapp|Line\/|DaumApps|everytimeApp|Band\//i.test(ua);
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  let deferred = null;
+  const store = { get(k){ try{return localStorage.getItem(k);}catch(_){return null;} }, set(k,v){ try{localStorage.setItem(k,v);}catch(_){} } };
+
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; });
+  window.addEventListener('appinstalled', () => { $('install').hidden = true; });
+
+  function sheet(html, arrow){
+    $('sheetBox').innerHTML = html + '<button class="btn close" id="sheetClose">닫기</button>' + (arrow ? '<div class="arrow">⬇</div>' : '');
+    $('sheet').hidden = false;
+    $('sheetClose').onclick = () => { $('sheet').hidden = true; };
+  }
+  $('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') $('sheet').hidden = true; });
+
+  async function showHow(){
+    if (inApp){
+      const url = location.href;
+      if (isKakao){
+        sheet(`<h2>사파리·크롬에서 열어주세요</h2><p class="sub">카카오톡 안에서는 홈 화면 추가와 사진 저장이 잘 안 돼요.</p>
+          <ol><li><span>아래 <b>브라우저로 열기</b>를 눌러요</span></li><li><span>열린 페이지에서 다시 이 안내를 따라 추가해요</span></li></ol>
+          <a class="btn primary close" style="text-decoration:none" href="kakaotalk://web/openExternal?url=${encodeURIComponent(url)}">브라우저로 열기</a>`);
+      } else {
+        sheet(`<h2>사파리·크롬에서 열어주세요</h2><p class="sub">지금은 다른 앱 안의 브라우저라서 홈 화면 추가가 안 돼요.</p>
+          <ol><li><span>화면 위나 아래의 <span class="ico">⋯</span> 메뉴를 눌러요</span></li>
+          <li><span><b>${isIOS ? 'Safari로 열기' : '다른 브라우저로 열기 / Chrome으로 열기'}</b>를 눌러요</span></li>
+          <li><span>열린 페이지에서 다시 이 안내를 따라 추가해요</span></li></ol>`);
+      }
+      return;
+    }
+    if (deferred){
+      deferred.prompt();
+      try { await deferred.userChoice; } catch(_){}
+      deferred = null; return;
+    }
+    if (isIOS){
+      sheet(`<h2>아이폰 홈 화면에 추가</h2><p class="sub">사파리에서 3번만 누르면 돼요.</p>
+        <ol><li><span>화면 아래 <span class="ico">⬆︎ 공유</span> 버튼을 눌러요<br><small style="color:var(--sub)">안 보이면 화면을 살짝 위로 스크롤하거나 <span class="ico">⋯</span>를 먼저 눌러요</small></span></li>
+        <li><span>목록을 내려서 <b>홈 화면에 추가</b>를 눌러요</span></li>
+        <li><span>오른쪽 위 <b>추가</b>를 누르면 끝!</span></li></ol>`, true);
+    } else if (isAndroid){
+      sheet(`<h2>홈 화면에 추가</h2><p class="sub">크롬·삼성 인터넷에서 3번만 누르면 돼요.</p>
+        <ol><li><span>오른쪽 위 <span class="ico">⋮</span> 메뉴를 눌러요 (삼성 인터넷은 아래 <span class="ico">≡</span>)</span></li>
+        <li><span><b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 눌러요</span></li>
+        <li><span><b>추가 / 설치</b>를 누르면 끝!</span></li></ol>`);
+    } else {
+      sheet(`<h2>휴대폰에서 열어주세요</h2><p class="sub">이 주소를 휴대폰의 사파리(아이폰)나 크롬(갤럭시)으로 열면 홈 화면에 추가할 수 있어요.</p>
+        <p class="sub" style="color:var(--ink);word-break:break-all">${location.href}</p>`);
+    }
+  }
+
+  $('installGo').onclick = showHow;
+  $('howto').onclick = showHow;
+  $('installX').onclick = () => { $('install').hidden = true; store.set('gr_install_dismissed', '1'); };
+
+  if (standalone){ $('howto').hidden = true; return; }
+  if ((isIOS || isAndroid) && !store.get('gr_install_dismissed')){
+    if (inApp) $('installSub').textContent = '먼저 사파리·크롬에서 열어야 해요';
+    $('install').hidden = false;
+  }
 })();
 </script>
 </body>
